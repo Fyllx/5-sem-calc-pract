@@ -13,8 +13,13 @@ public class Main {
 			}			
 		};		
 		
-//		Result r = EilerMethod.solve(a, b, N, f);		
-
+//		Result r = EilerMethod.solve(a, b, N, f);
+		
+		System.out.println("" + calc((d) -> {return (double)d*(double)d;}, 15));
 	}
-
+	
+	private static double calc(Function f, double d)
+	{
+		return (double) f.apply(d);
+	}
 }
