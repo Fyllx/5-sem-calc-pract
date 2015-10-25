@@ -1,9 +1,11 @@
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class AdamsBashfordMoulton implements Method {
 
 	@Override
-	public double[] solve(double a, double b, BiFunction<Double, Double, Double> f, double y0, int N) {
+	public double[] solve(double a, double b, BiFunction<Double, Double, Double> f, Function<Double, Double> fi,
+			Function<Double, Double> fix, double m, double y0, int N){
 		double h = (b-a) / (N-1); 
 		double[] y = new double[N];
 		int[] s = new int[N];
@@ -39,4 +41,9 @@ public class AdamsBashfordMoulton implements Method {
 		return "Adams-Bashford-Moulton's method";
 	}
 
+	@Override
+	public int getP()
+	{
+		return 4;
+	}
 }

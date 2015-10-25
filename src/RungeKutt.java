@@ -1,4 +1,5 @@
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class RungeKutt implements Method {
 
@@ -6,7 +7,8 @@ public class RungeKutt implements Method {
 	 * O(h^3)
 	 */
 	@Override
-	public double[] solve(double a, double b, BiFunction<Double, Double, Double> f, double y0, int N) {
+	public double[] solve(double a, double b, BiFunction<Double, Double, Double> f, Function<Double, Double> fi,
+			Function<Double, Double> fix, double m, double y0, int N){
 		double h = (b - a) / (N - 1);
 		double[] y = new double[N];
 		y[0] = y0;
@@ -25,4 +27,8 @@ public class RungeKutt implements Method {
 		return "Runge-Kutt's method";
 	}
 
+	@Override
+	public int getP() {
+		return 3;
+	}
 }

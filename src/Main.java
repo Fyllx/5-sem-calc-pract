@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -38,31 +39,19 @@ public class Main {
 			realmax = realmax < realFunc[1][i] ? realFunc[1][i] : realmax;
 		}
 		
-		doWork(new EilerMethod(), 2560);
-		doWork(new PredCorr(), 200);
-		doWork(new RungeKutt(), 20);
-		doWork(new GirMethod(), 160);
-		doWork(new RungeKuttSecond(), 40);		
-		doWork(new AdamsBashfordMoulton(), 20);
-		doWork(new GirMethodSecond(), 80);
+//		int[] N = new int[] {160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920};
+//		analyze(new EilerMethod(), N);
+		
+		int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280};
+		analyze(new PredCorr(), N);
+//		analyze(new RungeKutt(), N);
+//		analyze(new GirMethod(), 160);
+//		analyze(new RungeKuttSecond(), 40);		
+//		analyze(new AdamsBashfordMoulton(), 20);
+//		analyze(new GirMethodSecond(), 80);
 	}
 
-	private static void doWork(Method m, int N) {
-		double[] x = new double[N];
-		for (int i = 0; i < N; i++) {
-			x[i] = a + i * (b - a) / (N - 1);
-		}
-		double[] y = m.solve(a, b, f, fi.apply(a), N);
-		double min = realmin;
-		double max = realmax;
-		for(int i=0;i<N;i++)
-		{
-			min = min > y[i] ? y[i] : min;
-			max = max < y[i] ? y[i] : max;
-		}
-		min = min - 0.1;
-		max = max + 0.1;
-
+	private static void analyze(Method m, int[] Narr) {
 		DefaultXYDataset data;
 		ChartFrame frame;
 		JFreeChart chart;
@@ -72,34 +61,69 @@ public class Main {
 		// chart.getLegend().setVisible(false);
 		XYPlot plot = (XYPlot) chart.getPlot();
 		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-
-		data.addSeries("X axis", new double[][] { x, new double[N] });
+		chart.removeLegend();
+				
+		double[] xaxis = new double[]{a, b};
+		data.addSeries("X axis", new double[][] { xaxis, new double[2] });
 		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.black);
 
-		data.addSeries("Approximate chart. " + m.getName(), new double[][] { x, y });
-		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.red);
-		
 		addRealFunction(data, renderer);
 		
-		frame = createFrame(chart, m.getName() + "; N = " + N, a, b, min, max);
-	}
-	
-	private static void doWork(GirMethodAbstract m, int N) {
-		double[] x = new double[N];
-		for (int i = 0; i < N; i++) {
-			x[i] = a + i * (b - a) / (N - 1);
-		}
-		double[] y = m.solve(a, b, f, fi, fix, Main.m, fi.apply(a), N);
+		double eps[] = new double[Narr.length];		
 		double min = realmin;
 		double max = realmax;
-		for(int i=0;i<N;i++)
+		for(int q=0;q<Narr.length;q++)
 		{
-			min = min > y[i] ? y[i] : min;
-			max = max < y[i] ? y[i] : max;
+			int N = Narr[q];
+			double[] x = new double[N];
+			for (int i = 0; i < N; i++) {
+				x[i] = a + i * (b - a) / (N - 1);
+			}
+			double[] y = m.solve(a, b, f, fi, fix, Main.m, fi.apply(a), N);
+			
+			for(int i=0;i<N;i++)
+			{
+				eps[q] = Math.max(eps[q], Math.abs(fi.apply(x[i]) - y[i]));
+//				min = min > y[i] ? y[i] : min;
+//				max = max < y[i] ? y[i] : max;
+			}
+			
+			float fcol = 0.7f * (Narr.length - q) / (Narr.length + 1);
+			Color col = new Color(fcol, fcol, fcol);
+			data.addSeries("Approximate chart. " + m.getName() + ". N = "+N, new double[][] { x, y });
+			renderer.setSeriesPaint(data.getSeriesCount() - 1, col);
 		}
-		min = min - 0.1;
-		max = max + 0.1;
-
+		
+		System.out.println(m.getName());
+		System.out.println("N\teps\tk\tl");
+		for(int q=0;q<Narr.length;q++)
+		{
+			String k = "";
+			if(q>0)
+			{
+				k = ""+Math.log(eps[q-1]/eps[q])/Math.log(2);
+			}
+			String l = "";
+			if(q>1)
+			{
+				l = ""+Math.log((eps[q-2]-eps[q-1])/(eps[q-1]-eps[q]))/Math.log(2);
+			}
+			System.out.print(Narr[q]+" "+eps[q]+" "+k+" "+l+"\n");
+		}
+		System.out.println("");
+		
+		double[] Narrdouble = new double[Narr.length];
+		for(int q=0;q<Narr.length;q++)
+		{
+			Narrdouble[q] = 1.0 * Narr[q];
+		}
+		epsChart(new double[][]{Narrdouble, eps}, m.getP(), "Errors. "+m.getName());
+//		min = min - 0.1;
+//		max = max + 0.1;		
+		
+		frame = createFrame(chart, m.getName(), a, b, min, max);
+	}
+	private static void epsChart(double[][] eps, int p, String title) {
 		DefaultXYDataset data;
 		ChartFrame frame;
 		JFreeChart chart;
@@ -108,22 +132,31 @@ public class Main {
 		chart = ChartFactory.createXYLineChart(" ", "X", "Y", data);
 		// chart.getLegend().setVisible(false);
 		XYPlot plot = (XYPlot) chart.getPlot();
+		plot.setDomainAxis(new LogarithmicAxis("N"));
+		plot.setRangeAxis(new LogarithmicAxis("Eps"));
 		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-
-		data.addSeries("X axis", new double[][] { x, new double[N] });
+				
+		data.addSeries("Eps", eps);
 		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.black);
-
-		data.addSeries("Approximate chart. " + m.getName(), new double[][] { x, y });
+		
+		double begin = eps[0][0];
+		double end = eps[0][eps[0].length-1];
+		double[][] ch = new double[2][5000];
+		for(int q=0;q<ch[0].length;q++)
+		{
+			ch[0][q] = begin + q * (end - begin) / (ch[0].length - 1);
+			ch[1][q] = Math.pow(ch[0][q], -p);
+		}
+		data.addSeries("N^(-"+p+")", ch);
 		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.red);
-		
-		addRealFunction(data, renderer);
-		
-		frame = createFrame(chart, m.getName() + "; N = " + N, a, b, min, max);
+//		data.addSeries("X axis", new double[][] { xaxis, new double[2] });
+
+		frame = createFrame(chart, title);//, 0, end, 0, );
 	}
 
 	private static void addRealFunction(DefaultXYDataset data, XYLineAndShapeRenderer renderer) {
 		data.addSeries("Real function", realFunc);
-		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.black);
+		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.red);
 	}
 
 	private static ChartFrame createFrame(JFreeChart chart, String name, double xb, double xe, double yb, double ye) {
@@ -133,6 +166,26 @@ public class Main {
 		xyplot.setDomainGridlinePaint(Color.gray);
 		xyplot.getRangeAxis().setRange(yb, ye);
 		xyplot.getDomainAxis().setRange(xb, xe);
+
+		XYLineAndShapeRenderer lineandshaperenderer = (XYLineAndShapeRenderer) xyplot.getRenderer();
+		lineandshaperenderer.setDrawOutlines(true);
+		lineandshaperenderer.setUseFillPaint(true);
+		lineandshaperenderer.setBaseFillPaint(Color.white);
+
+		ChartFrame frame = new ChartFrame(name, chart);
+
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setVisible(true);
+		return frame;
+	}
+	private static ChartFrame createFrame(JFreeChart chart, String name) {
+		XYPlot xyplot = (XYPlot) chart.getPlot();
+		xyplot.setBackgroundPaint(Color.white);
+		xyplot.setRangeGridlinePaint(Color.gray);
+		xyplot.setDomainGridlinePaint(Color.gray);
+//		xyplot.getRangeAxis().setRange(yb, ye);
+//		xyplot.getDomainAxis().setRange(xb, xe);
 
 		XYLineAndShapeRenderer lineandshaperenderer = (XYLineAndShapeRenderer) xyplot.getRenderer();
 		lineandshaperenderer.setDrawOutlines(true);

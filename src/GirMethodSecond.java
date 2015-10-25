@@ -1,7 +1,7 @@
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class GirMethodSecond implements GirMethodAbstract{
+public class GirMethodSecond implements Method{
 
 	/**
 	 * O(h^4)
@@ -37,4 +37,8 @@ public class GirMethodSecond implements GirMethodAbstract{
 		return "Gir's second method";
 	}
 
+	@Override
+	public int getP() {
+		return 4;
+	}
 }
