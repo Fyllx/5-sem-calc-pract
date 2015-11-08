@@ -29,8 +29,8 @@ public class AdamsBashfordMoulton implements Method {
 			double f1 = f.apply(xi - 1 * h, y[i-1]);
 			double f0 = f.apply(xi, y[i]);
 			
-			double yvol = y[i] + h / 24. * (55 * f0 - 59 * f1 + 37 * f2 - 9 * f3);
-			y[i+1] = y[i] + h / 24. * (9 * f.apply(xi + h, yvol) + 19 * f0 - 5 * f1 + f2);
+			double yvol = y[i] + (55. * f0 - 59. * f1 + 37. * f2 - 9. * f3) / 24. * h;
+			y[i+1] = y[i] + (9. * f.apply(xi + h, yvol) + 19. * f0 - 5. * f1 + f2) / 24. * h;
 		}
 		return y;
 	}

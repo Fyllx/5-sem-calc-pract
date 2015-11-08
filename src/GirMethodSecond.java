@@ -26,8 +26,8 @@ public class GirMethodSecond implements Method{
 		for (int i = 3; i < N - 1; i++) {
 			double xi = a + i * h;
 
-			y[i + 1] = ((fix.apply(xi + h) - m * fi.apply(xi + h)) * 12 * h + 48 * y[i] - 36 * y[i - 1] + 16 * y[i - 2]
-					- 3 * y[i - 3]) / (25 - 12 * m * h);
+			y[i + 1] = ((fix.apply(xi + h) - m * fi.apply(xi + h)) * 12. * h + 48. * y[i] - 36. * y[i - 1] + 16. * y[i - 2]
+					- 3. * y[i - 3]) / (25. - 12. * m * h);
 		}
 		return y;
 	}

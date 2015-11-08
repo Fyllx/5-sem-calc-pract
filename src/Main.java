@@ -40,15 +40,22 @@ public class Main {
 		}
 		
 //		int[] N = new int[] {160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920};
+		int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920};//, 163840};//, 327680};
 //		analyze(new EilerMethod(), N);
 		
-		int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280};
-		analyze(new PredCorr(), N);
+		analyze(new PredCorr(1e-8), N);
+//		predCorrEpsilonAnylize(N);
+		
 //		analyze(new RungeKutt(), N);
-//		analyze(new GirMethod(), 160);
-//		analyze(new RungeKuttSecond(), 40);		
-//		analyze(new AdamsBashfordMoulton(), 20);
-//		analyze(new GirMethodSecond(), 80);
+		
+//		analyze(new GirMethod(), N);
+		
+//		analyze(new RungeKuttSecond(), N);
+		
+//		N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240};
+		analyze(new AdamsBashfordMoulton(), N);
+		
+		analyze(new GirMethodSecond(), N);
 	}
 
 	private static void analyze(Method m, int[] Narr) {
@@ -101,12 +108,12 @@ public class Main {
 			String k = "";
 			if(q>0)
 			{
-				k = ""+Math.log(eps[q-1]/eps[q])/Math.log(2);
+				k = ""+Math.log(Math.abs(eps[q-1]/eps[q]))/Math.log(2);
 			}
 			String l = "";
 			if(q>1)
 			{
-				l = ""+Math.log((eps[q-2]-eps[q-1])/(eps[q-1]-eps[q]))/Math.log(2);
+				l = ""+Math.log(Math.abs((eps[q-2]-eps[q-1])/(eps[q-1]-eps[q])))/Math.log(2);
 			}
 			System.out.print(Narr[q]+" "+eps[q]+" "+k+" "+l+"\n");
 		}
@@ -157,6 +164,67 @@ public class Main {
 	private static void addRealFunction(DefaultXYDataset data, XYLineAndShapeRenderer renderer) {
 		data.addSeries("Real function", realFunc);
 		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.red);
+	}
+	private static void predCorrEpsilonAnylize(int[] Narr)
+	{
+		DefaultXYDataset data;
+		ChartFrame frame;
+		JFreeChart chart;
+
+		data = new DefaultXYDataset();
+		chart = ChartFactory.createXYLineChart(" ", "X", "Y", data);
+		// chart.getLegend().setVisible(false);
+		XYPlot plot = (XYPlot) chart.getPlot();
+		plot.setDomainAxis(new LogarithmicAxis("N"));
+		plot.setRangeAxis(new LogarithmicAxis("Eps"));
+		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+
+		double[] Narrdouble = new double[Narr.length];
+		for(int q=0;q<Narr.length;q++)
+		{
+			Narrdouble[q] = 1.0 * Narr[q];
+		}
+		int from = 2;
+		int to = 12;
+		for(int q=from; q < to; q++)
+		{
+			double delta = Math.pow((0.1), q);
+			PredCorr m = new PredCorr(delta);
+			double eps[] = new double[Narr.length];		
+			double min = realmin;
+			double max = realmax;
+			for(int w=0;w<Narr.length;w++)
+			{
+				int N = Narr[w];
+				double[] x = new double[N];
+				for (int i = 0; i < N; i++) {
+					x[i] = a + i * (b - a) / (N - 1);
+				}
+				double[] y = m.solve(a, b, f, fi, fix, Main.m, fi.apply(a), N);
+				
+				for(int i=0;i<N;i++)
+				{
+					eps[w] = Math.max(eps[w], Math.abs(fi.apply(x[i]) - y[i]));
+				}
+			}
+			float fcol = 0.9f * (to - q) / (to + 1);
+			Color col = new Color(fcol, fcol, fcol);
+			data.addSeries("Eps, delta = "+delta, new double[][] {Narrdouble, eps} );			
+			renderer.setSeriesPaint(data.getSeriesCount() - 1, col);
+		}	
+		
+		double begin = Narrdouble[0];
+		double end = Narrdouble[Narrdouble.length-1];
+		double[][] ch = new double[2][5000];
+		for(int q=0;q<ch[0].length;q++)
+		{
+			ch[0][q] = begin + q * (end - begin) / (ch[0].length - 1);
+			ch[1][q] = Math.pow(ch[0][q], -2);
+		}
+		data.addSeries("N^(-"+2+")", ch);
+		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.red);
+//		data.addSeries("X axis", new double[][] { xaxis, new double[2] });		
+		frame = createFrame(chart, "PredCorr error analyze");
 	}
 
 	private static ChartFrame createFrame(JFreeChart chart, String name, double xb, double xe, double yb, double ye) {
