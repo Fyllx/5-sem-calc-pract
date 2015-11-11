@@ -3,7 +3,8 @@ import java.util.function.Function;
 
 public class PredCorr implements Method {
 
-	double delta;
+	private double delta;
+	private int maxiter = -1;
 	public PredCorr(double delta) {
 		this.delta = delta;
 	}
@@ -37,6 +38,7 @@ public class PredCorr implements Method {
 			itermax = Math.max(itermax, iter);
 			y[i+1] = ycorr; 
 		}
+		maxiter = itermax;
 		System.out.println(getName()+": max iter = "+itermax);
 		return y;
 	}
@@ -50,5 +52,10 @@ public class PredCorr implements Method {
 	@Override
 	public int getP() {
 		return 2;
+	}
+	
+	public int getMaxIter()
+	{
+		return maxiter;
 	}
 }

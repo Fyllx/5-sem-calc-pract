@@ -47,23 +47,23 @@ public class Main {
 //		analyze(new EilerMethod(), new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920}, true);
 		
 		int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840, 327680, 655360};
-		analyze(new PredCorr(1e-8), N, true);
-//		predCorrEpsilonAnylize(N);
+//		analyze(new PredCorr(1e-8), N, false);
+		predCorrEpsilonAnylize(N);
 //		
 //		N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840, 327680};
-//		analyze(new RungeKutt(), N);
+//		analyze(new RungeKutt(), N, false);
 		
 //		int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840, 327680, 655360, 1310720};
-//		analyze(new GirMethod(), N);
+//		analyze(new GirMethod(), N, false);
 		
 //		N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840};
 //		
-//		analyze(new RungeKuttSecond(), N);
+//		analyze(new RungeKuttSecond(), N, false);
 //		
 ////		N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240};
-//		analyze(new AdamsBashfordMoulton(), N);
+//		analyze(new AdamsBashfordMoulton(), N, false);
 //		
-//		analyze(new GirMethodSecond(), N);
+//		analyze(new GirMethodSecond(), N, false);
 	}
 
 	private static void analyze(Method m, int[] Narr, boolean drawCharts) {
@@ -229,12 +229,23 @@ public class Main {
 			Narrdouble[q] = 1.0 * Narr[q];
 		}
 		int from = 2;
-		int to = 12;
+		int to = 13;
+		Object[][] iterTableData = new Object[Narr.length+1][to-from+1];
+		Object[][] epsTableData = new Object[Narr.length+1][to-from+1];
+		String[] columnNames = new String[to-from+1];
+		columnNames[0] = "N";
+		iterTableData[0][0] = "N";
+		epsTableData[0][0] = "N";
 		for(int q=from; q < to; q++)
 		{
-			double delta = Math.pow((0.1), q);
+			double delta = Math.pow((0.1), q);			
+			iterTableData[0][q-from+1] = ""+delta;
+			epsTableData[0][q-from+1] = ""+delta;
+			columnNames[q-from+1] = ""+delta;
+					
 			PredCorr m = new PredCorr(delta);
-			double eps[] = new double[Narr.length];		
+			double[] eps = new double[Narr.length];
+			int[] iters = new int[Narr.length];
 			double min = realmin;
 			double max = realmax;
 			for(int w=0;w<Narr.length;w++)
@@ -245,17 +256,41 @@ public class Main {
 					x[i] = a + i * (b - a) / (N - 1);
 				}
 				double[] y = m.solve(a, b, f, fi, fix, Main.m, fi.apply(a), N);
+				iterTableData[w+1][q-from+1] = m.getMaxIter();
 				
 				for(int i=0;i<N;i++)
 				{
 					eps[w] = Math.max(eps[w], Math.abs(fi.apply(x[i]) - y[i]));
 				}
+				epsTableData[w+1][q-from+1] = eps[w];
 			}
 			float fcol = 0.9f * (to - q) / (to + 1);
 			Color col = new Color(fcol, fcol, fcol);
 			data.addSeries("Eps, delta = "+delta, new double[][] {Narrdouble, eps} );			
 			renderer.setSeriesPaint(data.getSeriesCount() - 1, col);
-		}	
+		}
+		for(int w=0;w<Narr.length;w++)
+		{
+			iterTableData[w+1][0] = Narr[w];
+			epsTableData[w+1][0] = Narr[w];
+		}
+		///iterTable			
+		JFrame itertableFrame = new JFrame("Pred-corr analyze, iter count");
+//		tableFrame.setLayout(new );
+		itertableFrame.add(new JTable(iterTableData, columnNames));
+		itertableFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		itertableFrame.pack();
+		itertableFrame.setVisible(true);
+		///iterTable
+		
+		///epsTable			
+		JFrame epstableFrame = new JFrame("Pred-corr analyze, eps");
+//		tableFrame.setLayout(new );
+		epstableFrame.add(new JTable(epsTableData, columnNames));
+		epstableFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		epstableFrame.pack();
+		epstableFrame.setVisible(true);
+		///epsTable
 		
 		double begin = Narrdouble[0];
 		double end = Narrdouble[Narrdouble.length-1];
