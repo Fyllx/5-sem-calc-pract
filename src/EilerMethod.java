@@ -22,7 +22,7 @@ public class EilerMethod implements Method {
 	@Override
 	public String getName()
 	{
-		return "Eiler's method";
+		return "Euler's method";
 	}
 
 	@Override

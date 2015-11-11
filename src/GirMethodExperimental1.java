@@ -1,7 +1,7 @@
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class GirMethod implements Method{
+public class GirMethodExperimental1 implements Method{
 
 	/**
 	 * O(h^3)
@@ -13,13 +13,10 @@ public class GirMethod implements Method{
 		double[] y = new double[N];
 		y[0] = y0;
 
-		// Runge-Kutt
+		// Euler
 		for (int i = 0; i < 2; i++) {
 			double xi = a + i * h;
-			double k1 = h * f.apply(xi, y[i]);
-			double k2 = h * f.apply(xi + h / 2., y[i] + k1 / 2.);
-			double k3 = h * f.apply(xi + h, y[i] - k1 + 2 * k2);
-			y[i + 1] = y[i] + (k1 + 4 * k2 + k3) / 6.;
+			y[i+1] = y[i] + h * f.apply(xi, y[i]); 
 		}
 
 		for (int i = 2; i < N - 1; i++) {
@@ -33,7 +30,7 @@ public class GirMethod implements Method{
 
 	@Override
 	public String getName() {
-		return "Gir's method of 3rd order with Runge-Kutt's (3rd order) first points";
+		return "Gir's method of 3rd order with Euler's first points";
 	}
 	
 	@Override
@@ -41,3 +38,4 @@ public class GirMethod implements Method{
 		return 3;
 	}
 }
+
