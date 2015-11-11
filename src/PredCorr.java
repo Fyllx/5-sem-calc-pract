@@ -16,6 +16,7 @@ public class PredCorr implements Method {
 	public double[] solve(double a, double b, BiFunction<Double, Double, Double> f, Function<Double, Double> fi,
 			Function<Double, Double> fix, double m, double y0, int N){
 		double h = (b-a) / (N-1); 
+//		delta = 2.25 * h*h;
 		double[] y = new double[N];
 		int[] s = new int[N];
 		y[0] = y0;
@@ -39,7 +40,7 @@ public class PredCorr implements Method {
 			y[i+1] = ycorr; 
 		}
 		maxiter = itermax;
-		System.out.println(getName()+": max iter = "+itermax);
+//		System.out.println(getName()+": max iter = "+itermax);
 		return y;
 	}
 	

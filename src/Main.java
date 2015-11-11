@@ -46,15 +46,15 @@ public class Main {
 //				655360, 1310720, 2621440, 5242880, 10485760, 20971520}, false);
 //		analyze(new EilerMethod(), new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920}, true);
 		
-		int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840, 327680, 655360};
-//		analyze(new PredCorr(1e-8), N, false);
-		predCorrEpsilonAnylize(N);
+		int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840, 327680, 655360, 1310720, 2621440};
+//		analyze(new PredCorr(1e-10), N, false);
+//		predCorrEpsilonAnylize(N);
 //		
 //		N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840, 327680};
 //		analyze(new RungeKutt(), N, false);
 		
 //		int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840, 327680, 655360, 1310720};
-//		analyze(new GirMethod(), N, false);
+		analyze(new GirMethod(), N, false);
 		
 //		N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840};
 //		
@@ -229,9 +229,11 @@ public class Main {
 			Narrdouble[q] = 1.0 * Narr[q];
 		}
 		int from = 2;
-		int to = 13;
+		int to = 16;
 		Object[][] iterTableData = new Object[Narr.length+1][to-from+1];
 		Object[][] epsTableData = new Object[Narr.length+1][to-from+1];
+		DecimalFormat formatter = new DecimalFormat("0.000E0");
+		
 		String[] columnNames = new String[to-from+1];
 		columnNames[0] = "N";
 		iterTableData[0][0] = "N";
@@ -239,8 +241,8 @@ public class Main {
 		for(int q=from; q < to; q++)
 		{
 			double delta = Math.pow((0.1), q);			
-			iterTableData[0][q-from+1] = ""+delta;
-			epsTableData[0][q-from+1] = ""+delta;
+			iterTableData[0][q-from+1] = formatter.format(delta);
+			epsTableData[0][q-from+1] = formatter.format(delta);
 			columnNames[q-from+1] = ""+delta;
 					
 			PredCorr m = new PredCorr(delta);
@@ -262,7 +264,7 @@ public class Main {
 				{
 					eps[w] = Math.max(eps[w], Math.abs(fi.apply(x[i]) - y[i]));
 				}
-				epsTableData[w+1][q-from+1] = eps[w];
+				epsTableData[w+1][q-from+1] = formatter.format(eps[w]);
 			}
 			float fcol = 0.9f * (to - q) / (to + 1);
 			Color col = new Color(fcol, fcol, fcol);
