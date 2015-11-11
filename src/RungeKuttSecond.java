@@ -25,7 +25,7 @@ public class RungeKuttSecond implements Method {
 
 	@Override
 	public String getName() {
-		return "Runge-Kutt's  second method";
+		return "Runge-Kutt's method of 4th order";
 	}
 
 	@Override

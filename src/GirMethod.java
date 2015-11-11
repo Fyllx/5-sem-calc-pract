@@ -33,7 +33,7 @@ public class GirMethod implements Method{
 
 	@Override
 	public String getName() {
-		return "Gir's method";
+		return "Gir's method of 3rd order";
 	}
 	
 	@Override

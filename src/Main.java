@@ -47,14 +47,14 @@ public class Main {
 //		analyze(new EilerMethod(), new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920}, true);
 		
 		int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840, 327680, 655360, 1310720, 2621440};
-//		analyze(new PredCorr(1e-10), N, false);
+//		analyze(new PredCorr(1e-15), N, false);
 //		predCorrEpsilonAnylize(N);
 //		
 //		N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840, 327680};
 //		analyze(new RungeKutt(), N, false);
 		
 //		int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840, 327680, 655360, 1310720};
-		analyze(new GirMethod(), N, false);
+//		analyze(new GirMethod(), N, false);
 		
 //		N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840};
 //		
@@ -64,6 +64,70 @@ public class Main {
 //		analyze(new AdamsBashfordMoulton(), N, false);
 //		
 //		analyze(new GirMethodSecond(), N, false);
+		
+		Method[] allMethods = new Method[] { new EilerMethod(), new PredCorr(1e-10), new RungeKutt(),
+				new GirMethod(), new RungeKuttSecond(), new AdamsBashfordMoulton(), new GirMethodSecond()};
+		compare(80, allMethods);
+	}
+	
+	private static void compare(int N, Method[] meth)
+	{		
+		DefaultXYDataset data;
+		ChartFrame frame;
+		JFreeChart chart;
+
+		data = new DefaultXYDataset();
+		chart = ChartFactory.createXYLineChart(" ", "X", "Y", data);
+		// chart.getLegend().setVisible(false);
+		XYPlot plot = (XYPlot) chart.getPlot();
+		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
+//		chart.removeLegend();
+				
+		double[] xaxis = new double[]{a, b};
+		data.addSeries("X axis", new double[][] { xaxis, new double[2] });
+		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.black);
+
+		addRealFunction(data, renderer);
+		
+		double min = realmin;
+		double max = realmax;
+		
+		double[] epsMethod = new double[meth.length];
+		for(int q=0;q<meth.length;q++)
+		{
+			Method m = meth[q];
+			double[] x = new double[N];
+			for (int i = 0; i < N; i++) {
+				x[i] = a + i * (b - a) / (N - 1);
+			}
+			double[] y = m.solve(a, b, f, fi, fix, Main.m, fi.apply(a), N);
+			
+			for(int w=0;w<y.length;w++)
+			{
+				epsMethod[q] = Math.max(epsMethod[q], Math.abs(fi.apply(x[w]) - y[w]));
+			}
+			
+			data.addSeries(m.getName(), new double[][] { x, y });
+//			renderer.setSeriesPaint(data.getSeriesCount() - 1, col);
+//			renderer.setSeries
+		}
+		frame = createFrame(chart, "Comparsion", a, b, min, max);
+		
+		String[] columnNames = {"Method",
+                "Eps"};
+		Object[][] tableData = new Object[meth.length+1][2];
+		tableData[0] = columnNames;
+		for(int q=1;q<meth.length+1;q++)
+		{
+			tableData[q][0] = meth[q-1].getName();
+			tableData[q][1] = epsMethod[q-1];
+		}
+		JFrame tableFrame = new JFrame("Comparsion table");
+//		tableFrame.setLayout(new );
+		tableFrame.add(new JTable(tableData, columnNames));
+		tableFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		tableFrame.pack();
+		tableFrame.setVisible(true);
 	}
 
 	private static void analyze(Method m, int[] Narr, boolean drawCharts) {
@@ -113,8 +177,8 @@ public class Main {
 			}
 		}
 		
-		System.out.println(m.getName());
-		System.out.println("N\teps\tk\tl");
+//		System.out.println(m.getName());
+//		System.out.println("N\teps\tk\tl");
 		String[] k = new String[Narr.length];
 		String[] l = new String[Narr.length];
 		for(int q=0;q<Narr.length;q++)
@@ -131,9 +195,9 @@ public class Main {
 				ll = ""+Math.log(Math.abs((eps[q-2]-eps[q-1])/(eps[q-1]-eps[q])))/Math.log(2);
 			}
 			l[q] = ll;
-			System.out.print(Narr[q]+" "+eps[q]+" "+k[q]+" "+l[q]+"\n");
+//			System.out.print(Narr[q]+" "+eps[q]+" "+k[q]+" "+l[q]+"\n");
 		}
-		System.out.println("");
+//		System.out.println("");
 		
 		double[] Narrdouble = new double[Narr.length];
 		for(int q=0;q<Narr.length;q++)

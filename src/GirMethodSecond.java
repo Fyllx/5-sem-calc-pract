@@ -34,7 +34,7 @@ public class GirMethodSecond implements Method{
 
 	@Override
 	public String getName() {
-		return "Gir's second method";
+		return "Gir's method of 4th order";
 	}
 
 	@Override
