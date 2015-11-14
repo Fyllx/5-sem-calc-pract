@@ -48,8 +48,8 @@ public class Main {
 		// analyze(new EilerMethod(), new int[] {10, 20, 40, 80, 160, 320, 640,
 		// 1280, 2560, 5120, 10240, 20480, 40960, 81920}, true);
 
-		int[] N = new int[] { 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840,
-				327680, 655360, 1310720, 2621440};
+//		int[] N = new int[] { 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840,
+//				327680, 655360, 1310720, 2621440};
 		// analyze(new PredCorr(1e-15), N, false);
 		// predCorrEpsilonAnylize(N);
 		//
@@ -57,8 +57,7 @@ public class Main {
 		// 10240, 20480, 40960, 81920, 163840, 327680};
 		// analyze(new RungeKutt(), N, false);
 
-		// int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120,
-		// 10240, 20480, 40960, 81920, 163840, 327680, 655360, 1310720};
+		 int[] N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480};
 		// analyze(new GirMethod(), N, false);
 
 		// N = new int[] {10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120,
@@ -75,12 +74,18 @@ public class Main {
 		Method[] allMethods = new Method[] { new EilerMethod(), new PredCorr(1e-10), new RungeKutt(), new GirMethod(),
 				new RungeKuttSecond(), new AdamsBashfordMoulton(), new GirMethodSecond() };
 		// compare(80, allMethods);
-
 //		compareEps(allMethods, N);
 
-		Method[] girsVariations = new Method[] { new GirMethodExperimental1(), new GirMethodExperimental2(),
-				new GirMethod(), new GirMethodExperimental4() };
-		compareEps(girsVariations, N);
+
+//		Method[] girsVariations = new Method[] { new GirMethodExperimental1(), new GirMethodExperimental2(),
+//				new GirMethod(), new GirMethodExperimental4() };
+//		compareEps(girsVariations, N);
+		
+		Method[] rungeclarified = new Method[]{new RungeKuttSecond(), new Clarified(new Clarified(new RungeKuttSecond()))};
+		compare(20, rungeclarified);
+		compareEps(rungeclarified, N);
+		analyze(rungeclarified[0], N, false);
+		analyze(rungeclarified[1], N, false);
 	}
 
 	private static void compareEps(Method[] meth, int[] Narr) {
@@ -107,8 +112,11 @@ public class Main {
 		double[][] epsMethod = new double[meth.length][Narr.length];
 
 		for (int q = 0; q < meth.length; q++) {
+			Method m = meth[q];
+			String[] columnNames = { "N", "Eps" };
+			Object[][] epsTableData = new Object[Narr.length+1][2];
+			epsTableData[0] = columnNames;
 			for (int w = 0; w < Narr.length; w++) {
-				Method m = meth[q];
 				double[] x = new double[Narr[w]];
 				for (int i = 0; i < Narr[w]; i++) {
 					x[i] = a + i * (b - a) / (Narr[w] - 1);
@@ -119,6 +127,16 @@ public class Main {
 					epsMethod[q][w] = Math.max(epsMethod[q][w], Math.abs(fi.apply(x[e]) - y[e]));
 				}
 			}
+			for (int w = 1; w < Narr.length+1; w++) {
+				epsTableData[w][0] = ""+Narr[w-1];
+				epsTableData[w][1] = epsMethod[q][w - 1];
+			}
+			JFrame epstableFrame = new JFrame("Epstable, "+m.getName());
+			// tableFrame.setLayout(new );
+			epstableFrame.add(new JTable(epsTableData, columnNames));
+			epstableFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			epstableFrame.pack();
+			epstableFrame.setVisible(true);
 		}
 		double[] Narrdouble = new double[Narr.length];
 		for (int q = 0; q < Narr.length; q++) {
