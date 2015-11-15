@@ -81,11 +81,13 @@ public class Main {
 //				new GirMethod(), new GirMethodExperimental4() };
 //		compareEps(girsVariations, N);
 		
-		Method[] rungeclarified = new Method[]{new RungeKuttSecond(), new Clarified(new Clarified(new RungeKuttSecond()))};
-		compare(20, rungeclarified);
-		compareEps(rungeclarified, N);
-		analyze(rungeclarified[0], N, false);
-		analyze(rungeclarified[1], N, false);
+//		Method[] rungeclarified = new Method[]{new RungeKuttSecond(), new Clarified(new Clarified(new RungeKuttSecond()))};
+//		compare(20, rungeclarified);
+//		compareEps(rungeclarified, N);
+//		analyze(rungeclarified[0], N, false);
+//		analyze(rungeclarified[1], N, false);
+		
+		analyze(new EilerMethod(), new int[] {3710}, true);
 	}
 
 	private static void compareEps(Method[] meth, int[] Narr) {
