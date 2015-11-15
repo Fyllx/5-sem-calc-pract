@@ -13,7 +13,6 @@ import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.chart.axis.NumberAxis;
 
 public class Main {
 
@@ -87,7 +86,8 @@ public class Main {
 //		analyze(rungeclarified[0], N, false);
 //		analyze(rungeclarified[1], N, false);
 		
-		analyze(new EilerMethod(), new int[] {3710}, true);
+//		analyze(new EilerMethod(), new int[] {3710}, true);
+		MainLate.lateAnalysis();
 	}
 
 	private static void compareEps(Method[] meth, int[] Narr) {
