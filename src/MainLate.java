@@ -38,8 +38,13 @@ public class MainLate {
 			realmax = realmax < realFunc[1][i] ? realFunc[1][i] : realmax;
 		}
 		
-		int[] Marr = new int[]{4, 8, 16, 32};
-		analyze(new EilerMethodLate(), Marr, true);		 
+		int[] Marr = new int[]{5, 10, 20, 40, 80, 160, 320};
+//		analyzeLate(new EilerMethodLate(), Marr, true);
+//		analyzeLate(new GirMethodLate(), Marr, true);
+//		analyzeLate(new GirMethodSecondLate(), Marr, true);
+		
+		MethodLate[] allMethods = new MethodLate[]{new EilerMethodLate(), new GirMethodLate(), new GirMethodSecondLate()};
+		compare(20, allMethods);
 	}
 	
 	private static double realFunc(double t)
@@ -56,7 +61,7 @@ public class MainLate {
 		return res;
 	}
 
-	private static void analyze(MethodLate m, int[] Marr, boolean drawCharts) {
+	private static void analyzeLate(MethodLate m, int[] Marr, boolean drawCharts) {
 		DefaultXYDataset data;
 		ChartFrame frame;
 		JFreeChart chart;
@@ -80,7 +85,7 @@ public class MainLate {
 		for (int q = 0; q < Marr.length; q++) {
 			
 			int M = Marr[q];
-			double h = (a-tau) / (M - 1);
+			double h = (a-tau) / M;
 			int N = (int) ((b-tau) / h);
 			
 			double[] x = new double[N];
@@ -124,16 +129,16 @@ public class MainLate {
 	
 		double[] Narrdouble = new double[Marr.length];
 		for (int q = 0; q < Marr.length; q++) {
-			double h = (a-tau) / (Marr[q] - 1);
+			double h = (a-tau) / Marr[q];
 			int N = (int) ((b-tau) / h);
 			Narrdouble[q] = 1.0 * N;
 		}
-//		epsChart(new double[][][] { { Narrdouble, eps } }, new String[] { "Errors. " + m.getName() },
-//				new int[] { m.getP() }, "Errors. " + m.getName());
+		epsChart(new double[][][] { { Narrdouble, eps } }, new String[] { "Errors. " + m.getName() },
+				new int[] { m.getP() }, "Errors. " + m.getName());
 		// min = min - 0.1;
 		// max = max + 0.1;
 		if (drawCharts)
-			frame = createFrame(chart, m.getName(), tau, b, min, max);
+			frame = createFrame(chart, m.getName(), a, b, min, max);
 	
 		///////////////////////////// tables
 		String[] columnNames = { "N", "Eps", "K", "L" };
@@ -218,8 +223,8 @@ public class MainLate {
 
 		epsChart(epschart, names, new int[0], "Errors comparsion");
 	}
-
-	private static void compare(int N, Method[] meth) {
+*/
+	private static void compare(int M, MethodLate[] meth) {
 		DefaultXYDataset data;
 		ChartFrame frame;
 		JFreeChart chart;
@@ -239,20 +244,23 @@ public class MainLate {
 
 		double min = realmin;
 		double max = realmax;
+		double h = (a-tau) / M;
+		int N = (int) ((b-tau) / h);
+		
+		double[] x = new double[N];
+		for (int i = 0; i < N; i++) {
+			x[i] = tau + i * (b - tau) / (N - 1);
+		}
 
 		double[] epsMethod = new double[meth.length];
 		for (int q = 0; q < meth.length; q++) {
-			Method m = meth[q];
-			double[] x = new double[N];
-			for (int i = 0; i < N; i++) {
-				x[i] = a + i * (b - a) / (N - 1);
-			}
-			double[] y = m.solve(a, b, f, fi, fix, MainLate.m, fi.apply(a), N);
+			MethodLate m = meth[q];
+			double[] y = m.solve(tau, a, b, fi, M);
 
 			for (int w = 0; w < y.length; w++) {
-				epsMethod[q] = Math.max(epsMethod[q], Math.abs(fi.apply(x[w]) - y[w]));
+				epsMethod[q] = Math.max(epsMethod[q], Math.abs(realFunc(x[w]) - y[w]));
 			}
-
+			
 			data.addSeries(m.getName(), new double[][] { x, y });
 			// renderer.setSeriesPaint(data.getSeriesCount() - 1, col);
 			// renderer.setSeries
@@ -273,7 +281,7 @@ public class MainLate {
 		tableFrame.pack();
 		tableFrame.setVisible(true);
 	}
-
+	
 	private static void epsChart(double[][][] eps, String[] names, int[] p, String title) {
 		DefaultXYDataset data;
 		ChartFrame frame;
@@ -316,7 +324,7 @@ public class MainLate {
 
 		frame = createFrame(chart, title);// , 0, end, 0, );
 	}
-*/
+	
 	private static void addRealFunction(DefaultXYDataset data, XYLineAndShapeRenderer renderer) {
 		data.addSeries("Real function", realFunc);
 		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.red);

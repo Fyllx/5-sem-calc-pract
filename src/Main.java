@@ -72,7 +72,7 @@ public class Main {
 
 		Method[] allMethods = new Method[] { new EilerMethod(), new PredCorr(1e-10), new RungeKutt(), new GirMethod(),
 				new RungeKuttSecond(), new AdamsBashfordMoulton(), new GirMethodSecond() };
-		// compare(80, allMethods);
+//		 compare(80, allMethods);
 //		compareEps(allMethods, N);
 
 
