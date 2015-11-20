@@ -38,13 +38,15 @@ public class MainLate {
 			realmax = realmax < realFunc[1][i] ? realFunc[1][i] : realmax;
 		}
 		
-		int[] Marr = new int[]{5, 10, 20, 40, 80, 160, 320};
-//		analyzeLate(new EilerMethodLate(), Marr, true);
-//		analyzeLate(new GirMethodLate(), Marr, true);
-//		analyzeLate(new GirMethodSecondLate(), Marr, true);
+		int[] Marr = new int[]{5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120, 10240, 20480, 40960, 81920, 163840};
+		analyzeLate(new EilerMethodLate(), Marr, false);
+		analyzeLate(new GirMethodLate(), Marr, false);
+		analyzeLate(new GirMethodSecondLate(), Marr, false);
 		
 		MethodLate[] allMethods = new MethodLate[]{new EilerMethodLate(), new GirMethodLate(), new GirMethodSecondLate()};
-		compare(20, allMethods);
+//		compare(20, allMethods);
+//		compareEps(allMethods, Marr);
+		
 	}
 	
 	private static double realFunc(double t)
@@ -96,6 +98,7 @@ public class MainLate {
 	
 			for (int i = 0; i < N; i++) {
 				eps[q] = Math.max(eps[q], Math.abs(realFunc(x[i]) - y[i]));
+//				eps[q] += Math.abs(realFunc(x[i]) - y[i]);
 				// min = min > y[i] ? y[i] : min;
 				// max = max < y[i] ? y[i] : max;
 			}
@@ -141,14 +144,15 @@ public class MainLate {
 			frame = createFrame(chart, m.getName(), a, b, min, max);
 	
 		///////////////////////////// tables
-		String[] columnNames = { "N", "Eps", "K", "L" };
-		Object[][] tableData = new Object[Marr.length + 1][4];
+		String[] columnNames = {"M", "N", "Eps", "K", "L" };
+		Object[][] tableData = new Object[Marr.length + 1][5];
 		tableData[0] = columnNames;
 		for (int q = 1; q < Marr.length + 1; q++) {
-			tableData[q][0] = (int)Narrdouble[q - 1];
-			tableData[q][1] = eps[q - 1];
-			tableData[q][2] = k[q - 1];
-			tableData[q][3] = l[q - 1];
+			tableData[q][0] = Marr[q - 1];
+			tableData[q][1] = (int)Narrdouble[q - 1];
+			tableData[q][2] = eps[q - 1];
+			tableData[q][3] = k[q - 1];
+			tableData[q][4] = l[q - 1];
 		}
 		JFrame tableFrame = new JFrame(m.getName() + ". Table");
 		// tableFrame.setLayout(new );
@@ -157,8 +161,8 @@ public class MainLate {
 		tableFrame.pack();
 		tableFrame.setVisible(true);
 	}
-/*
-	private static void compareEps(Method[] meth, int[] Narr) {
+
+	private static void compareEps(MethodLate[] meth, int[] Marr) {
 		DefaultXYDataset data;
 		ChartFrame frame;
 		JFreeChart chart;
@@ -170,36 +174,44 @@ public class MainLate {
 		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
 		// chart.removeLegend();
 
-		double[] xaxis = new double[] { a, b };
-		data.addSeries("X axis", new double[][] { xaxis, new double[2] });
-		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.black);
-
-		addRealFunction(data, renderer);
-
-		double min = realmin;
-		double max = realmax;
+//		double[] xaxis = new double[] { a, b };
+//		data.addSeries("X axis", new double[][] { xaxis, new double[2] });
+//		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.black);
+//
+//		addRealFunction(data, renderer);
+//
+//		double min = realmin;
+//		double max = realmax;
+		
+		int[] Narr = new int[Marr.length];
+		for(int q=0;q<Narr.length;q++)
+		{
+			double h = (a-tau) / Marr[q];
+			Narr[q] = (int) ((b-tau) / h);
+		}
 
 		double[][] epsMethod = new double[meth.length][Narr.length];
 
 		for (int q = 0; q < meth.length; q++) {
-			Method m = meth[q];
-			String[] columnNames = { "N", "Eps" };
-			Object[][] epsTableData = new Object[Narr.length+1][2];
+			MethodLate m = meth[q];
+			String[] columnNames = {"M", "N", "Eps"};
+			Object[][] epsTableData = new Object[Narr.length+1][3];
 			epsTableData[0] = columnNames;
 			for (int w = 0; w < Narr.length; w++) {
 				double[] x = new double[Narr[w]];
 				for (int i = 0; i < Narr[w]; i++) {
-					x[i] = a + i * (b - a) / (Narr[w] - 1);
+					x[i] = tau + i * (b - tau) / (Narr[w] - 1);
 				}
-				double[] y = m.solve(a, b, f, fi, fix, MainLate.m, fi.apply(a), Narr[w]);
+				double[] y = m.solve(tau, a, b, fi, Marr[w]);
 
 				for (int e = 0; e < y.length; e++) {
-					epsMethod[q][w] = Math.max(epsMethod[q][w], Math.abs(fi.apply(x[e]) - y[e]));
+					epsMethod[q][w] = Math.max(epsMethod[q][w], Math.abs(realFunc(x[e]) - y[e]));
 				}
 			}
 			for (int w = 1; w < Narr.length+1; w++) {
-				epsTableData[w][0] = ""+Narr[w-1];
-				epsTableData[w][1] = epsMethod[q][w - 1];
+				epsTableData[w][0] = ""+Marr[w-1];
+				epsTableData[w][1] = ""+Narr[w-1];
+				epsTableData[w][2] = epsMethod[q][w - 1];
 			}
 			JFrame epstableFrame = new JFrame("Epstable, "+m.getName());
 			// tableFrame.setLayout(new );
@@ -221,9 +233,9 @@ public class MainLate {
 			p[q] = meth[q].getP();
 		}
 
-		epsChart(epschart, names, new int[0], "Errors comparsion");
+		epsChart(epschart, names, new int[] {1}, "Errors comparsion");
 	}
-*/
+
 	private static void compare(int M, MethodLate[] meth) {
 		DefaultXYDataset data;
 		ChartFrame frame;
@@ -329,99 +341,6 @@ public class MainLate {
 		data.addSeries("Real function", realFunc);
 		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.red);
 	}
-/*
-	private static void predCorrEpsilonAnylize(int[] Narr) {
-		DefaultXYDataset data;
-		ChartFrame frame;
-		JFreeChart chart;
-
-		data = new DefaultXYDataset();
-		chart = ChartFactory.createXYLineChart(" ", "X", "Y", data);
-		// chart.getLegend().setVisible(false);
-		XYPlot plot = (XYPlot) chart.getPlot();
-		plot.setDomainAxis(new LogarithmicAxis("N"));
-		plot.setRangeAxis(new LogarithmicAxis("Eps"));
-		XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-
-		double[] Narrdouble = new double[Narr.length];
-		for (int q = 0; q < Narr.length; q++) {
-			Narrdouble[q] = 1.0 * Narr[q];
-		}
-		int from = 2;
-		int to = 16;
-		Object[][] iterTableData = new Object[Narr.length + 1][to - from + 1];
-		Object[][] epsTableData = new Object[Narr.length + 1][to - from + 1];
-		DecimalFormat formatter = new DecimalFormat("0.000E0");
-
-		String[] columnNames = new String[to - from + 1];
-		columnNames[0] = "N";
-		iterTableData[0][0] = "N";
-		epsTableData[0][0] = "N";
-		for (int q = from; q < to; q++) {
-			double delta = Math.pow((0.1), q);
-			iterTableData[0][q - from + 1] = formatter.format(delta);
-			epsTableData[0][q - from + 1] = formatter.format(delta);
-			columnNames[q - from + 1] = "" + delta;
-
-			PredCorr m = new PredCorr(delta);
-			double[] eps = new double[Narr.length];
-			int[] iters = new int[Narr.length];
-			double min = realmin;
-			double max = realmax;
-			for (int w = 0; w < Narr.length; w++) {
-				int N = Narr[w];
-				double[] x = new double[N];
-				for (int i = 0; i < N; i++) {
-					x[i] = a + i * (b - a) / (N - 1);
-				}
-				double[] y = m.solve(a, b, f, fi, fix, MainLate.m, fi.apply(a), N);
-				iterTableData[w + 1][q - from + 1] = m.getMaxIter();
-
-				for (int i = 0; i < N; i++) {
-					eps[w] = Math.max(eps[w], Math.abs(fi.apply(x[i]) - y[i]));
-				}
-				epsTableData[w + 1][q - from + 1] = formatter.format(eps[w]);
-			}
-			float fcol = 0.9f * (to - q) / (to + 1);
-			Color col = new Color(fcol, fcol, fcol);
-			data.addSeries("Eps, delta = " + delta, new double[][] { Narrdouble, eps });
-			renderer.setSeriesPaint(data.getSeriesCount() - 1, col);
-		}
-		for (int w = 0; w < Narr.length; w++) {
-			iterTableData[w + 1][0] = Narr[w];
-			epsTableData[w + 1][0] = Narr[w];
-		}
-		/// iterTable
-		JFrame itertableFrame = new JFrame("Pred-corr analyze, iter count");
-		// tableFrame.setLayout(new );
-		itertableFrame.add(new JTable(iterTableData, columnNames));
-		itertableFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		itertableFrame.pack();
-		itertableFrame.setVisible(true);
-		/// iterTable
-
-		/// epsTable
-		JFrame epstableFrame = new JFrame("Pred-corr analyze, eps");
-		// tableFrame.setLayout(new );
-		epstableFrame.add(new JTable(epsTableData, columnNames));
-		epstableFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		epstableFrame.pack();
-		epstableFrame.setVisible(true);
-		/// epsTable
-
-		double begin = Narrdouble[0];
-		double end = Narrdouble[Narrdouble.length - 1];
-		double[][] ch = new double[2][5000];
-		for (int q = 0; q < ch[0].length; q++) {
-			ch[0][q] = begin + q * (end - begin) / (ch[0].length - 1);
-			ch[1][q] = Math.pow(ch[0][q], -2);
-		}
-		data.addSeries("N^(-" + 2 + ")", ch);
-		renderer.setSeriesPaint(data.getSeriesCount() - 1, Color.red);
-		// data.addSeries("X axis", new double[][] { xaxis, new double[2] });
-		frame = createFrame(chart, "PredCorr error analyze");
-	}
-*/
 	private static ChartFrame createFrame(JFreeChart chart, String name, double xb, double xe, double yb, double ye) {
 		XYPlot xyplot = (XYPlot) chart.getPlot();
 		xyplot.setBackgroundPaint(Color.white);
